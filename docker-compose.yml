@@ -3,7 +3,7 @@ services:
     build:
       context: ./backend
     image: backend:1.0
-    container_name: resume-backend
+    container_name: week4-backend
     env_file: .env
     environment:
       GEMINI_API_KEY: /run/secrets/gemini_api_key
@@ -22,7 +22,7 @@ services:
     build:
       context: ./frontend
     image: frontend:1.0
-    container_name: resume-frontend
+    container_name: week4-frontend
     environment:
       BACKEND_URL: /run/secrets/backend_url
     ports:
@@ -35,7 +35,7 @@ services:
 
   ollama:
     image: ollama/ollama:latest
-    container_name: resume-ollama
+    container_name: week4-ollama
     ports:
       - "11434:11434"
     volumes:
