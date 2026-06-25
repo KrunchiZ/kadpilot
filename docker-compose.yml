@@ -1,0 +1,59 @@
+services:
+  backend:
+    build:
+      context: ./backend
+    image: backend:1.0
+    container_name: resume-backend
+    env_file: .env
+    environment:
+      GEMINI_API_KEY: /run/secrets/gemini_api_key
+      OLLAMA_MODEL_PATH: /run/secrets/ollama_model_path
+    ports:
+      - "8001:8001"
+    networks:
+      - app-net
+    volumes:
+      - ./backend/data/:/app/data:ro
+    restart: unless-stopped
+    depends_on:
+      - ollama
+
+  frontend:
+    build:
+      context: ./frontend
+    image: frontend:1.0
+    container_name: resume-frontend
+    environment:
+      BACKEND_URL: /run/secrets/backend_url
+    ports:
+      - "8000:8000"
+    depends_on:
+      - backend
+    networks:
+      - app-net
+    restart: unless-stopped
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: resume-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ${OLLAMA_MODEL_PATH:-/usr/share/ollama}/.ollama:/root/.ollama
+    networks:
+      - app-net
+    restart: unless-stopped
+
+
+networks:
+  app-net:
+    driver: bridge
+
+
+secrets:
+  gemini_api_key:
+    file: secrets/gemini_api_key.txt
+  backend_url:
+    file: secrets/backend_url.txt
+  ollama_model_path:
+    file: secrets/ollama_model_path.txt
