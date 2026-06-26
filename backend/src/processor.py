@@ -12,7 +12,7 @@ logging.basicConfig(
 class CreditCard(BaseModel):
 	card_title	: str = Field(min_length=1)
 	bank		: str = Field(min_length=1)
-	company		: str = Field(min_length=1)
+	fees		: str = Field(min_length=1)
 	description	: str = Field(min_length=1)
 
 
@@ -30,7 +30,7 @@ def process_all_html(input_dir, output_dir):
 				card_title = (soup.find("meta", property="og:title")["content"]
 							.rstrip("/").split("/")[-1])
 				bank = card_title.split()[0]
-				company = get_soup_text(soup, "advertiser-name")
+				fees = get_soup_text(soup, "advertiser-name")
 				description = get_soup_text(soup, "jobAdDetails")
 		except Exception as code:
 			logging.error(f"Error processing {html_file.name}: {code}")
@@ -40,7 +40,7 @@ def process_all_html(input_dir, output_dir):
 			output_data = CreditCard(
 				card_title = card_title,
 				bank = bank,
-				company = company,
+				fees = fees,
 				description = description
 			)
 			output_path = output_dir / (html_file.stem + ".json")
