@@ -16,7 +16,7 @@ class CreditCard(BaseModel):
 	petrol				: str = Field(min_length=1)
 	rewards				: str = Field(min_length=1)
 	travel				: str = Field(min_length=1)
-	premium				: str = Field(min_length=1)
+	premium_perks		: str = Field(min_length=1)
 	balance_transfer	: str = Field(min_length=1)
 	easy_payment_plan	: str = Field(min_length=1)
 	fees				: str = Field(min_length=1)
@@ -61,7 +61,7 @@ def process_all_html(input_dir, output_dir):
 				cashback = get_soup_text(soup, "cashback")
 				rewards = get_soup_text(soup, "rewards")
 				travel = get_soup_text(soup, "travel")
-				premium = get_soup_text(soup, "premium")
+				premium_perks = get_soup_text(soup, "premium")
 				balance_transfer = get_soup_text(soup, "balance-transfer")
 				easy_payment_plan = get_soup_text(soup, "easy-payment-plan")
 				fees = get_soup_text(soup, "fees")
@@ -72,13 +72,6 @@ def process_all_html(input_dir, output_dir):
 			logging.error(f"Error processing {html_file.name}: {code}")
 			continue
 
-		# print(
-		# 	f"card_title: {card_title}\nbank: {bank}\ncashback: {cashback}\n"
-		# 	f"petrol: {petrol}\nrewards: {rewards}\ntravel: {travel}\npremium: {premium}\n"
-		# 	f"balance_transfer: {balance_transfer}\neasy_payment_plan: {easy_payment_plan}\n"
-		# 	f"fees: {fees}\nrequirements: {requirements}\nfeatures: {features}\nreview: {review}\n"
-		# )
-
 		try:
 			output_data = CreditCard(
 				card_title = card_title,
@@ -87,7 +80,7 @@ def process_all_html(input_dir, output_dir):
 				petrol = petrol,
 				rewards = rewards,
 				travel = travel,
-				premium = premium,
+				premium_perks = premium_perks,
 				balance_transfer = balance_transfer,
 				easy_payment_plan = easy_payment_plan,
 				fees = fees,
@@ -175,15 +168,6 @@ def get_all_elements_text(tag) -> str:
 	return sanitize_text(value)
 
 
-def sanitize_text(text: str) -> str:
-	text = text.replace("\u2013", "-")
-	text = text.replace("\x00", "").replace("\0", "")
-	text = re.sub(r'[\u2018\u2019]', "'", text)
-	text = re.sub(r'[\xa0\u200b\u200c\u200d]', ' ', text)
-	text = re.sub(r'[ \t]+', ' ', text)
-	return text.strip()
-
-
 def get_table_text(tag) -> str:
 	caption = tag.find("caption")
 	value: str = caption.get_text(separator=" ", strip=True) +"\n" if caption else ""
@@ -209,3 +193,12 @@ def table_to_markdown(table) -> str:
 				markdown.append("|" + "|".join(["---"] * len(cells)) + "|")
 			markdown.append("| " + " | ".join(cells) + " |")
 	return "\n".join(markdown)
+
+
+def sanitize_text(text: str) -> str:
+	text = text.replace("\u2013", "-")
+	text = text.replace("\x00", "").replace("\0", "")
+	text = re.sub(r'[\u2018\u2019]', "'", text)
+	text = re.sub(r'[\xa0\u200b\u200c\u200d]', ' ', text)
+	text = re.sub(r'[ \t]+', ' ', text)
+	return text.strip()
