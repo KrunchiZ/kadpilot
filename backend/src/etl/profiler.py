@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 DEV = os.getenv("DEV") == "true"
-QUERY_DIR = Path("../../sql") if DEV else Path("/app/sql")
+QUERY_DIR = Path("../../../sql") if DEV else Path("/app/sql")
 COUNT_TOTAL_CARDS = QUERY_DIR / "count_total_cards.sql"
 COUNT_CARDS = QUERY_DIR / "count_cards.sql"
 COUNT_CATEGORIES = QUERY_DIR / "count_categories.sql"
