@@ -2,6 +2,7 @@ import os
 import json
 import sqlite3
 import logging
+from dotenv import load_dotenv
 from pathlib import Path
 from hashlib import sha256
 
@@ -11,7 +12,9 @@ logging.basicConfig(
 	format="%(asctime)s | %(levelname)s | %(message)s"
 )
 
-QUERY_DIR = Path("/app/sql") or Path("../../sql")
+load_dotenv()
+DEV = os.getenv("DEV") == "true"
+QUERY_DIR = Path("../../sql") if DEV else Path("/app/sql")
 OPEN_TABLE_QUERY = QUERY_DIR / "open_table.sql"
 INSERT_FIELDS_QUERY = QUERY_DIR / "insert_fields.sql"
 GET_CONTENT_HASH_QUERY = QUERY_DIR / "get_content_hash.sql"
