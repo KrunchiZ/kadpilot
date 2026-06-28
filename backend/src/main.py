@@ -1,14 +1,18 @@
+import os
 import sys
 from pathlib import Path
 from ingestor import ingest_all_mhtml
 from processor import process_all_html
 from loader import load_all_jsons
 from profiler import run_data_profile
+from dotenv import load_dotenv
 
-SOURCE_DIR = Path("/app/data/0_source") or Path("../../data/0_source")
-BRONZE_DIR = Path("/app/data/1_bronze") or Path("../../data/1_bronze")
-SILVER_DIR = Path("/app/data/2_silver") or Path("../../data/2_silver")
-GOLD_DIR = Path("/app/data/3_gold") or Path("../../data/3_gold")
+load_dotenv()
+DEV = os.getenv("DEV") == "true"
+SOURCE_DIR = Path("../../data/0_source") if DEV else Path("/app/data/0_source")
+BRONZE_DIR = Path("../../data/1_bronze") if DEV else Path("/app/data/1_bronze")
+SILVER_DIR = Path("../../data/2_silver") if DEV else Path("/app/data/2_silver")
+GOLD_DIR = Path("../../data/3_gold") if DEV else Path("/app/data/3_gold")
 DB_NAME = "credit_cards.db"
 
 
