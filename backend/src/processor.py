@@ -1,4 +1,5 @@
 import os
+import re
 import logging
 from bs4 import BeautifulSoup
 from pydantic import BaseModel, ValidationError, Field
@@ -11,16 +12,36 @@ logging.basicConfig(
 class CreditCard(BaseModel):
 	card_title			: str = Field(min_length=1)
 	bank				: str = Field(min_length=1)
-	cashback			: str = Field(min_length=1, default="N/A")
-	petrol				: str = Field(min_length=1, default="N/A")
-	rewards				: str = Field(min_length=1, default="N/A")
-	travel				: str = Field(min_length=1, default="N/A")
-	premium				: str = Field(min_length=1, default="N/A")
+	cashback			: str = Field(min_length=1)
+	petrol				: str = Field(min_length=1)
+	rewards				: str = Field(min_length=1)
+	travel				: str = Field(min_length=1)
+	premium				: str = Field(min_length=1)
 	balance_transfer	: str = Field(min_length=1)
 	easy_payment_plan	: str = Field(min_length=1)
 	fees				: str = Field(min_length=1)
 	requirements		: str = Field(min_length=1)
-	features			: str = Field(min_length=1, default="N/A")
+	features			: str = Field(min_length=1)
+	review				: str = Field(min_length=1)
+
+BANK_NAMES = [
+	"Affin",
+	"Alliance Bank",
+	"AmBank",
+	"Bank Islam",
+	"Bank Muamalat",
+	"Bank Rakyat",
+	"BSN",
+	"CIMB",
+	"HSBC",
+	"Hong Leong",
+	"Maybank",
+	"OCBC Bank",
+	"Public Bank",
+	"RHB",
+	"Standard Chartered",
+	"UOB"
+]
 
 
 def process_all_html(input_dir, output_dir):
@@ -35,7 +56,7 @@ def process_all_html(input_dir, output_dir):
 			with open(html_file, "r", encoding="utf-8") as in_file:
 				soup = BeautifulSoup(in_file, "html.parser")
 				card_title = (soup.find("meta", property="og:title")["content"])
-				bank = " ".join(card_title.split()[:2])
+				bank = get_bank_name(card_title)
 				petrol = get_soup_text(soup, "petrol")
 				cashback = get_soup_text(soup, "cashback")
 				rewards = get_soup_text(soup, "rewards")
@@ -46,9 +67,17 @@ def process_all_html(input_dir, output_dir):
 				fees = get_soup_text(soup, "fees")
 				requirements = get_soup_text(soup, "requirements")
 				features = get_soup_text(soup, "features")
+				review = get_soup_text(soup, "review")
 		except Exception as code:
 			logging.error(f"Error processing {html_file.name}: {code}")
 			continue
+
+		# print(
+		# 	f"card_title: {card_title}\nbank: {bank}\ncashback: {cashback}\n"
+		# 	f"petrol: {petrol}\nrewards: {rewards}\ntravel: {travel}\npremium: {premium}\n"
+		# 	f"balance_transfer: {balance_transfer}\neasy_payment_plan: {easy_payment_plan}\n"
+		# 	f"fees: {fees}\nrequirements: {requirements}\nfeatures: {features}\nreview: {review}\n"
+		# )
 
 		try:
 			output_data = CreditCard(
@@ -64,6 +93,7 @@ def process_all_html(input_dir, output_dir):
 				fees = fees,
 				requirements = requirements,
 				features = features,
+				review = review,
 			)
 			output_path = output_dir / (html_file.stem + ".json")
 			with open(output_path, "w", encoding="utf-8") as out_file:
@@ -102,19 +132,38 @@ def init_output_dir(output_dir):
 		return False
 
 
+def get_bank_name(card_title):
+	for bank in BANK_NAMES:
+		if bank.lower() in card_title.lower():
+			return bank
+	return None
+
+
 def get_soup_text(soup, attr_value):
 	tag = soup.find(attrs={"id": attr_value})
 	if tag is None:
-		return None
+		if (attr_value == "card_title" or attr_value == "bank"
+	  			or attr_value == "fees" or attr_value == "requirements"
+				or attr_value == "review"):
+			return None
+		else:
+			return "N/A"
 	value: str = get_all_elements_text(tag)
 	if value == "":
-		return None
+		if (attr_value == "card_title" or attr_value == "bank"
+	  			or attr_value == "fees" or attr_value == "requirements"
+				or attr_value == "review"):
+			return None
+		else:
+			return "N/A"
 	return value
 
 
-def get_all_elements_text(tag):
+def get_all_elements_text(tag) -> str:
 	value: str = ""
 	for element in tag.find_all(recursive=False):
+		if element.name == "small" or element.name == "button":
+			continue
 		if element.name == "article":
 			value += get_all_elements_text(element)
 		elif element.name == "table":
@@ -123,20 +172,26 @@ def get_all_elements_text(tag):
 			value += get_table_text(element.find("table")) + "\n"
 		else:
 			value += element.get_text(separator=" ", strip=True) + "\n"
+	return sanitize_text(value)
+
+
+def sanitize_text(text: str) -> str:
+	text = text.replace("\u2013", "-")
+	text = text.replace("\x00", "").replace("\0", "")
+	text = re.sub(r'[\u2018\u2019]', "'", text)
+	text = re.sub(r'[\xa0\u200b\u200c\u200d]', ' ', text)
+	text = re.sub(r'[ \t]+', ' ', text)
+	return text.strip()
+
+
+def get_table_text(tag) -> str:
+	caption = tag.find("caption")
+	value: str = caption.get_text(separator=" ", strip=True) +"\n" if caption else ""
+	value += table_to_markdown(tag)
 	return value
 
 
-def get_table_text(tag):
-	value: str = ""
-	caption = tag.find("caption")
-	value += (
-		"\n" + caption.get_text(separator=" ", strip=True) + "\n" if caption
-		else "\n"
-	)
-	value += table_to_markdown(tag)
-
-
-def table_to_markdown(table):
+def table_to_markdown(table) -> str:
 	markdown: list[str] = []
 	
 	headers = [th.get_text(separator=" ", strip=True) for th in table.find_all("th")]
