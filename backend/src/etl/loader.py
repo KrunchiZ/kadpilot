@@ -100,7 +100,6 @@ def init_entry(data):
 		"fees":					data["fees"],
 		"requirements":			data["requirements"],
 		"features":				data["features"],
-		"review":				data["review"]
 	}
 
 	hash_input = json.dumps(core_content, sort_keys=True, default=str)
@@ -118,8 +117,6 @@ def init_entry(data):
 		"fees":					data["fees"],
 		"requirements":			data["requirements"],
 		"features":				data["features"],
-		"review":				data["review"],
-		"keywords":				None,
 		"content_hash":			sha256(hash_input.encode('utf-8')).hexdigest()
 	}
 
@@ -139,7 +136,5 @@ def upsert_entry(conn, entry):
 					entry["fees"],
 					entry["requirements"],
 					entry["features"],
-					entry["review"],
-					entry["keywords"],
 					entry["content_hash"]
 	))

@@ -22,7 +22,6 @@ class CreditCard(BaseModel):
 	fees				: str = Field(min_length=1)
 	requirements		: str = Field(min_length=1)
 	features			: str = Field(min_length=1)
-	review				: str = Field(min_length=1)
 
 BANK_NAMES = [
 	"AEON",
@@ -67,7 +66,6 @@ def process_all_html(input_dir, output_dir):
 				fees = get_soup_text(soup, "fees")
 				requirements = get_soup_text(soup, "requirements")
 				features = get_soup_text(soup, "features")
-				review = get_soup_text(soup, "review")
 		except Exception as code:
 			logging.error(f"Error processing {html_file.name}: {code}")
 			continue
@@ -86,7 +84,6 @@ def process_all_html(input_dir, output_dir):
 				fees = fees,
 				requirements = requirements,
 				features = features,
-				review = review,
 			)
 			output_path = output_dir / (html_file.stem + ".json")
 			with open(output_path, "w", encoding="utf-8") as out_file:
@@ -157,8 +154,6 @@ def get_all_elements_text(tag) -> str:
 	for element in tag.find_all(recursive=False):
 		if element.name == "small" or element.name == "button":
 			continue
-		if element.name == "article":
-			value += get_all_elements_text(element)
 		elif element.name == "table":
 			value += get_table_text(element) + "\n"
 		elif element.name == "div" and "table-wrapper" in element.get("class", []):

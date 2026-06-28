@@ -11,7 +11,5 @@ CREATE TABLE IF NOT EXISTS credit_cards (
 	fees				TEXT NOT NULL,
 	requirements		TEXT NOT NULL,
 	features			TEXT NOT NULL,
-	review				TEXT NOT NULL,
-	keywords			TEXT,
     content_hash		TEXT NOT NULL
 );
