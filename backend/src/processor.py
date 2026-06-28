@@ -35,9 +35,8 @@ def process_all_html(input_dir, output_dir):
 		try:
 			with open(html_file, "r", encoding="utf-8") as in_file:
 				soup = BeautifulSoup(in_file, "html.parser")
-				card_title = (soup.find("meta", property="og:title")["content"]
-							.rstrip("/").split("/")[-1])
-				bank = card_title.split()[0]
+				card_title = (soup.find("meta", property="og:title")["content"])
+				bank = " ".join(card_title.split()[:2])
 				petrol = get_soup_text(soup, "petrol")
 				cashback = get_soup_text(soup, "cashback")
 				rewards = get_soup_text(soup, "rewards")
