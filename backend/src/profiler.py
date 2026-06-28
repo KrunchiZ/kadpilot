@@ -65,8 +65,8 @@ def get_data_profile_stats(db_path):
 
 def print_data_profile_report(stats):
 	print(
-		f"--- 🔍 DATA QUALITY REPORT ---"
-		f"\n📊 Total Records: {stats['total_records']}"
+		f"--- 🔍 DATA REPORT ---"
+		f"\n📊 Total Records: {stats['total_records']}\n"
 		f"\n💳 Card Counts:"
 	)
 	for bank, count in stats["card_counts"].items():
