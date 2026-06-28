@@ -106,7 +106,7 @@ def init_entry(data):
 	hash_input = json.dumps(core_content, sort_keys=True, default=str)
 
 	return {    
-		"card_title":			data["card_name"],
+		"card_title":			data["card_title"],
 		"bank":					data["bank"],
 		"cashback":				data["cashback"],
 		"petrol":				data["petrol"],
