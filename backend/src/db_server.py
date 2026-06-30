@@ -74,13 +74,14 @@ def fetch_all_cards(offset: int = 0, limit: int = 10) -> list[dict]:
 
 
 @mcp.tool()
-def fetch_card_by_title(card_title: str) -> list[dict]:
+def fetch_card_by_title(card_title: str) -> dict:
 	sql = _load_sql(FETCH_CARD_BY_TITLE)
 	with _connect() as conn:
 		conn.row_factory = sqlite3.Row
 		cursor = conn.cursor()
 		cursor.execute(sql, {"card_title": card_title})
-		return [dict(row) for row in cursor.fetchall()]
+		row = cursor.fetchone()
+		return dict(row) if row else {}
 
 
 @mcp.tool()

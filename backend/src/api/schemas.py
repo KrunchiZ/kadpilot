@@ -22,6 +22,7 @@ class CardSummary(BaseModel):
 
 class AskResponse(BaseModel):
 	answer: str
+	final_card: dict
 	cards_used: list[CardSummary]
 	provider: str
 	top_k: int
