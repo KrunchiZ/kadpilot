@@ -65,11 +65,11 @@ def count_categories() -> dict:
 
 
 @mcp.tool()
-def fetch_all_cards() -> list[dict]:
+def fetch_all_cards(offset: int = 0, limit: int = 10) -> list[dict]:
 	sql = _load_sql(FETCH_ALL_CARDS)
 	with _connect() as conn:
 		cursor = conn.cursor()
-		cursor.execute(sql)
+		cursor.execute(sql, {"offset": offset, "limit": limit})
 		return [dict(row) for row in cursor.fetchall()]
 
 

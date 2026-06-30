@@ -15,11 +15,6 @@ from api.schemas import (
 	CardsListResponse,
 )
 
-logging.basicConfig(
-	level=logging.INFO,
-	format="[%(asctime)s] | %(levelname)s | %(message)s",
-	datefmt="%d/%m/%y %H:%M:%S",
-)
 
 router = APIRouter()
 
@@ -40,18 +35,24 @@ async def health_check():
 async def list_cards(
 	request: Request,
 	offset: int = Query(0, ge=0),
-	limit: int = Query(17, ge=1, le=100),
+	limit: int = Query(10, ge=1, le=100),
+	paginate: bool = Query(False, description="Whether to paginate the results"),
 ):
 	mcp = request.app.state.mcp_client
-	result = await mcp.call_tool("fetch_all_cards")
-	all_cards: list[dict] = (
-		json.loads(result.content[0].text) if result.content else []
-	)
-	total = len(all_cards)
-	paginated = all_cards[offset: offset + limit]
+	index = offset
+	cards: list[dict] = []
+	while True:
+		result = await mcp.call_tool("fetch_all_cards", {"offset": index, "limit": limit})
+		current_batch: list[dict] = json.loads(result.content[0].text) if result.content else []
+		if not current_batch:
+			break
+		cards.extend(current_batch)
+		if paginate or len(current_batch) < limit:
+			break
+		index += limit
 	return CardsListResponse(
-		cards=[CardSummary(**c) for c in paginated],
-		total=total,
+		cards=[CardSummary(**c) for c in cards],
+		total=len(cards),
 	)
 
 
@@ -87,10 +88,19 @@ async def ask(request: Request, user_request: AskRequest):
 
 	# 2. Fetch full card details for the matched titles
 	mcp = request.app.state.mcp_client
-	result = await mcp.call_tool("fetch_all_full_cards")
-	all_cards: list[dict] = json.loads(result.content[0].text) if result.content else []
-	title_to_card = {c["card_title"]: c for c in all_cards}
-	cards = [title_to_card[t] for t in matched_card_titles if t in title_to_card]
+	offset = 0
+	cards: list[dict] = []
+	while True:
+		result = await mcp.call_tool("fetch_all_cards", {"offset": offset, "limit": 10})
+		current_batch: list[dict] = json.loads(result.content[0].text) if result.content else []
+		if not current_batch:
+			break
+		title_to_card = {c["card_title"]: c for c in current_batch}
+		matched_cards = [title_to_card[t] for t in matched_card_titles if t in title_to_card]
+		cards.extend(matched_cards)
+		if len(current_batch) < 10:
+			break
+		offset += 10
 
 	if not cards:
 		return AskResponse(

@@ -1,1 +1,3 @@
-SELECT card_title, bank FROM credit_cards
+SELECT * FROM credit_cards
+LIMIT :limit
+OFFSET :offset
