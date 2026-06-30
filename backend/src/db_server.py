@@ -4,6 +4,7 @@ All queries are loaded from ./sql/*.sql files.
 Run standalone or used as a stdio MCP server by tag_data.py.
 """
 
+import sys
 import sqlite3
 from pathlib import Path
 from fastmcp import FastMCP
@@ -16,6 +17,9 @@ COUNT_TOTAL_CARDS = BASE / "count_total_cards.sql"
 FETCH_ALL_CARDS = BASE / "fetch_all_cards.sql"
 FETCH_CARD_BY_TITLE = BASE / "fetch_card_by_title.sql"
 DISTINCT_BANKS = BASE / "distinct_banks.sql"
+COUNT_AVG_FEES_LENGTH = BASE / "count_avg_fees_length.sql"
+FETCH_UNTAGGED_CARDS = BASE / "fetch_untagged_cards.sql"
+UPDATE_MIN_ANNUAL_INCOME = BASE / "update_min_annual_income.sql"
 
 
 # MCP server
@@ -65,6 +69,24 @@ def count_categories() -> dict:
 
 
 @mcp.tool()
+def count_avg_fees_length() -> float:
+	# Return the average length of job descriptions.
+	sql = _load_sql(COUNT_AVG_FEES_LENGTH)
+	with _connect() as conn:
+		result = conn.execute(sql).fetchone()
+	return float(result[0]) if result else 0
+
+
+@mcp.tool()
+def fetch_untagged_cards(batch_size: int) -> list[dict]:
+	# Return cards where min_annual_income is NULL or empty in batch.
+	sql = _load_sql(FETCH_UNTAGGED_CARDS)
+	with _connect() as conn:
+		rows = conn.execute(sql, {"batch_size": batch_size}).fetchall()
+	return [dict(r) for r in rows]
+
+
+@mcp.tool()
 def fetch_all_cards(offset: int = 0, limit: int = 10) -> list[dict]:
 	sql = _load_sql(FETCH_ALL_CARDS)
 	with _connect() as conn:
@@ -91,6 +113,20 @@ def fetch_all_banks() -> list[str]:
 		cursor = conn.cursor()
 		cursor.execute(sql)
 		return [row[0] for row in cursor.fetchall()]
+	
+
+@mcp.tool()
+def update_min_annual_income(card_title: str, min_annual_income: str) -> bool:
+	# Write the extracted min_annual_income for a single card row.
+	sql = _load_sql(UPDATE_MIN_ANNUAL_INCOME)
+	try:
+		with _connect() as conn:
+			conn.execute(sql, {"min_annual_income": min_annual_income, "card_title": card_title})
+			conn.commit()
+		return True
+	except Exception as exc:
+		print(f"[db_server] update_min_annual_income error for {card_title}: {exc}", file=sys.stderr)
+		return False
 
 
 if __name__ == "__main__":
