@@ -105,6 +105,7 @@ async def ask(request: Request, user_request: AskRequest):
 	if not cards:
 		return AskResponse(
 			answer="I couldn't find any matching credit cards in the database.",
+			final_card=None,
 			cards_used=[],
 			provider=user_request.llm_provider,
 			top_k=user_request.top_k,
@@ -126,14 +127,20 @@ async def ask(request: Request, user_request: AskRequest):
 	if answer is None:
 		raise HTTPException(status_code=503, detail="LLM returned no response.")
 
+	final_card = answer.splitlines()[0]
+	final_card = json.loads(
+		(await mcp.call_tool("fetch_card_by_title", {"card_title": final_card}))
+		.content[0].text
+	)
 	try:
 		return AskResponse(
 			answer=answer,
+			final_card=final_card,
 			cards_used=[CardSummary(**{"card_title": c["card_title"], "bank": c["bank"]}) for c in cards],
 			provider=user_request.llm_provider,
 			top_k=user_request.top_k,
 		)
 	except ValidationError as code:
 		error_messages = [f"{' -> '.join(map(str, err['loc']))}: {err['msg']} ({err['type']})"
-			for err in user_request.errors()]
+			for err in code.errors()]
 		raise HTTPException(status_code=422, detail=f"{error_messages}")
