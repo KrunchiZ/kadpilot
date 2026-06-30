@@ -28,14 +28,14 @@ Health check.
 
 <br>
 
-## GET /api/v1/cards?offset=0&limit=17
+## GET /api/v1/cards?offset=0&limit=10
 
 List all credit cards with pagination.
 
 **Query params:**
 
 - `offset` (int, default 0) — skip this many cards
-- `limit` (int, default 17) — max cards to return
+- `limit` (int, default 10) — max cards to return
 
 **Response:**
 
@@ -78,7 +78,8 @@ Get a single card by title (URL-encoded).
   "easy_payment_plan": "Easy Payment Plans\nChoose from...",
   "fees": "Fees & Charges\nAnnual Fee RM0...",
   "requirements": "Requirements\nMinimum Annual Income RM24,000...",
-  "features": "Features\nEasy Payment Plan..."
+  "features": "Features\nEasy Payment Plan...",
+  "min_annual_income": "24000"
 }
 ```
 
@@ -108,7 +109,7 @@ The RAG chat endpoint. Sends a question and gets an AI-generated answer backed b
 {
   "question": "Which card has the best cashback for online shopping?",
   "top_k": 3,
-  "llm_provider": "gemini"
+  "llm_provider": "gemini-3.1-flash-lite"
 }
 ```
 
@@ -129,12 +130,13 @@ The RAG chat endpoint. Sends a question and gets an AI-generated answer backed b
 
 ```json
 {
-  "answer": "Based on the available credit cards, the AmBank Cash Rebate Visa Platinum Card offers the best cashback for online shopping. It provides 10% cash rebates capped at RM10 monthly for online transactions, shopping, grocery, dining, and public transport spending — but only when you maintain a minimum monthly balance of RM1,500 or above. For balances below RM1,500, you still earn 0.2% uncapped cashback on all retail spending.\n\nNo other card in the database offers a comparable cashback rate for online transactions.",
+  "answer": "AmBank BonusLink Visa Signature\nAmBank\n---\nBased on the available credit cards, the AmBank Cash Rebate Visa Platinum Card offers the best cashback for online shopping. It provides 10% cash rebates capped at RM10 monthly for online transactions, shopping, grocery, dining, and public transport spending — but only when you maintain a minimum monthly balance of RM1,500 or above. For balances below RM1,500, you still earn 0.2% uncapped cashback on all retail spending.\n\nNo other card in the database offers a comparable cashback rate for online transactions.",
+  "final_card": {"card_title": "AmBank BonusLink Visa Signature", "bank": "AmBank", ...} // the full detail of the final card in answer in JSON format
   "cards_used": [
     { "card_title": "AmBank Cash Rebate Visa Platinum Card", "bank": "AmBank" },
     { "card_title": "AmBank BonusLink Visa Signature", "bank": "AmBank" }
   ],
-  "provider": "gemini",
+  "provider": "gemini-3.1-flash-lite",
   "top_k": 3
 }
 ```
@@ -142,6 +144,7 @@ The RAG chat endpoint. Sends a question and gets an AI-generated answer backed b
 **Fields:**
 
 - `answer` (string) — the AI-generated response
+- `final_card` (json) — the final card details chosen in the answer
 - `cards_used` (array) — which cards informed the answer
 - `provider` (string) — which LLM was used
 - `top_k` (int) — how many cards were considered
@@ -150,6 +153,6 @@ The RAG chat endpoint. Sends a question and gets an AI-generated answer backed b
 
 ## Notes
 
+- **PLEASE USE REVERSE PROXY by making the frontend python script calling the backend url instead of browser HTML/js**
 - The `/ask` endpoint may take a few seconds — it retrieves cards, builds a prompt, and calls the LLM.
-- If `llm_provider` is set to `"ollama"`, the request goes through the local Ollama service (port 11434). If set to `"gemini"`, it uses the Gemini cloud API.
 - The `cards` endpoint returns only title + bank (lightweight). Use `cards/{title}` to get full card details.
