@@ -116,7 +116,14 @@ The RAG chat endpoint. Sends a question and gets an AI-generated answer backed b
 
 - `question` (string, required, 1–500 chars) — the user's query
 - `top_k` (int, default 3, range 1–17) — how many cards to use as context
-- `llm_provider` (string, default "gemini") — `"gemini"` or `"ollama"`
+- `llm_provider` (string, default "gemini-3.1-flash-lite")
+  - gemini models
+    - `"gemini-3.1-flash-lite"`
+    - `"gemini-2.5-flash-lite"`
+    - `"gemini-3.5-flash"`
+  - ollama models
+    - `"llama3.2"`
+    - `"gemma3:1b"`
 
 **Response:**
 
