@@ -53,7 +53,7 @@ def _ensure_ollama_client():
 	global _ollama_client
 	if _ollama_client is None:
 		_ollama_client = ollama.Client(
-			host=os.getenv("OLLAMA_HOST", "http://ollama:11434")
+			host=os.getenv("OLLAMA_HOST", "http://localhost:11434")
 		)
 	return _ollama_client
 
