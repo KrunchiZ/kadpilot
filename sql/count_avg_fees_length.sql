@@ -1,0 +1,1 @@
+SELECT CAST(ROUND(AVG(LENGTH(fees))) AS INTEGER) FROM credit_cards;
