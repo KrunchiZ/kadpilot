@@ -17,10 +17,7 @@ logging.basicConfig(
 DEV = os.getenv("DEV") == "true"
 
 DB_PATH = Path("../data/3_gold/credit_cards.db") if DEV else Path("/app/data/3_gold/credit_cards.db")
-DB_SERVER_PATH = Path("rag/db_server.py")
+DB_SERVER_PATH = Path("src/db_server.py")
 SQL_PATH = Path("../sql") if DEV else Path("/app/sql")
 
 RATE_LIMITS_PATH = Path(__file__).parent.parent / "rag" / "rate_limits.txt"
-
-logging.info("Database path: %s", DB_PATH.resolve())
-logging.info("Rate limits path: %s", RATE_LIMITS_PATH.resolve())

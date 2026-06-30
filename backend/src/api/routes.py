@@ -3,7 +3,7 @@ import logging
 import json
 from pydantic import ValidationError
 from fastapi import APIRouter, HTTPException, Request, Query
-from config.settings import DB_SERVER_PATH, RATE_LIMITS_PATH
+from config.settings import RATE_LIMITS_PATH
 from rag import retriever
 from rag.prompts import build_user_prompt
 from rag.prompt_model import prompt_model
@@ -28,11 +28,6 @@ _rate_limiter = RateLimiter(RATE_LIMITS_PATH)
 
 
 # ---------------------------------------------------------------------------
-# Helper: fetch all cards from SQLite
-# ---------------------------------------------------------------------------
-
-
-# ---------------------------------------------------------------------------
 # Routes
 # ---------------------------------------------------------------------------
 
@@ -47,8 +42,8 @@ async def list_cards(
 	offset: int = Query(0, ge=0),
 	limit: int = Query(17, ge=1, le=100),
 ):
-	async with request.app.state.mcp_client as mcp:
-		result = await mcp.call("fetch_all_cards")
+	mcp = request.app.state.mcp_client
+	result = await mcp.call_tool("fetch_all_cards")
 	all_cards: list[dict] = (
 		json.loads(result.content[0].text) if result.content else []
 	)
@@ -62,8 +57,8 @@ async def list_cards(
 
 @router.get("/cards/{card_title}")
 async def get_card(request: Request, card_title: str):
-	async with request.app.state.mcp_client as mcp:
-		result = await mcp.call("fetch_card_by_title", {"card_title": card_title})
+	mcp = request.app.state.mcp_client
+	result = await mcp.call_tool("fetch_card_by_title", {"card_title": card_title})
 	if not result.content:
 		raise HTTPException(status_code=404, detail=f"Card not found: {card_title}")
 	return json.loads(result.content[0].text)
@@ -71,8 +66,8 @@ async def get_card(request: Request, card_title: str):
 
 @router.get("/banks")
 async def list_banks(request: Request):
-	async with request.app.state.mcp_client as mcp:
-		result = await mcp.call("fetch_all_banks")
+	mcp = request.app.state.mcp_client
+	result = await mcp.call_tool("fetch_all_banks")
 	return json.loads(result.content[0].text) if result.content else []
 
 
@@ -91,8 +86,8 @@ async def ask(request: Request, user_request: AskRequest):
 	matched_card_titles = retriever.extract_card_titles(matched_chunks)
 
 	# 2. Fetch full card details for the matched titles
-	async with request.app.state.mcp_client as mcp:
-		result = await mcp.call("fetch_all_full_cards")
+	mcp = request.app.state.mcp_client
+	result = await mcp.call_tool("fetch_all_full_cards")
 	all_cards: list[dict] = json.loads(result.content[0].text) if result.content else []
 	title_to_card = {c["card_title"]: c for c in all_cards}
 	cards = [title_to_card[t] for t in matched_card_titles if t in title_to_card]
@@ -107,8 +102,6 @@ async def ask(request: Request, user_request: AskRequest):
 
 	# 3. Build prompt
 	full_prompt = build_user_prompt(user_request.question, cards)
-
-	print(f"Full prompt sent to LLM:\n{full_prompt}\n")
 
 	# 4. Throttle before calling LLM
 	_rate_limiter.wait_if_needed(llm_model, full_prompt)

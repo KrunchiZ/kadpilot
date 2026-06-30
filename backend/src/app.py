@@ -18,27 +18,25 @@ logging.basicConfig(
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Initialize RAG context once at startup."""
-    logging.info("Booting up local RAG matrix...")
-
-    embedder = SentenceTransformer("all-MiniLM-L6-v2")
-    cards = load_cards(DB_PATH)
-    initialize_rag_context(cards, embedder)
-
     # Warm up Gemini client so first request doesn't stall
     try:
         _ensure_gemini_client()
     except RuntimeError:
         pass  # API key not available locally — fine for dev
+    
+    logging.info("DB server path: %s", DB_SERVER_PATH.resolve())
+    app.state.mcp_client = Client(DB_SERVER_PATH.resolve())
+    await app.state.mcp_client.__aenter__()
 
+    logging.info("Booting up local RAG matrix...")
+    embedder = SentenceTransformer("all-MiniLM-L6-v2")
+    cards = load_cards(DB_PATH)
+    initialize_rag_context(cards, embedder)
     logging.info("RAG matrix initialized and cached in RAM!")
-    app.state.mcp_client = Client(DB_SERVER_PATH)
-    await app.state.mcp_client.connect()
-
     yield
 
     logging.info("Shutting down RAG server...")
-    await app.state.mcp_client.close()
+    await app.state.mcp_client.__aexit__(None, None, None)
 
 
 app = FastAPI(title="Credit Card RAG Advisor", version="1.0.0", lifespan=lifespan)

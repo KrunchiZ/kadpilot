@@ -65,7 +65,7 @@ def count_categories() -> dict:
 
 
 @mcp.tool()
-def fetch_all_cards(batch_size: int) -> list[dict]:
+def fetch_all_cards() -> list[dict]:
 	sql = _load_sql(FETCH_ALL_CARDS)
 	with _connect() as conn:
 		cursor = conn.cursor()
@@ -84,7 +84,7 @@ def fetch_card_by_title(card_title: str) -> list[dict]:
 
 
 @mcp.tool()
-def distinct_banks() -> list[str]:
+def fetch_all_banks() -> list[str]:
 	sql = _load_sql(DISTINCT_BANKS)
 	with _connect() as conn:
 		cursor = conn.cursor()
