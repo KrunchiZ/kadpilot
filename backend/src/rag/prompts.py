@@ -23,7 +23,7 @@ def build_user_prompt(question: str, cards: list[dict]) -> str:
 	for card in cards:
 		i = 1
 		section = (
-			f"#{i}\nCARD_TITLE= {card['card_title']}\nBANK= {card['bank']}\n"
+			f"#{i}\nCARD_TITLE= {card['card_title']}\nBANK= {card['bank']}\n\n"
 			f"DETAILS:\n"
 		)
 		for field in FIELDS_TO_SHOW:
@@ -31,10 +31,11 @@ def build_user_prompt(question: str, cards: list[dict]) -> str:
 			if value and value != "N/A":
 				section += f"{value}\n\n"
 		card_sections.append(section)
+		i += 1
 
 	return (
 		f"{SYSTEM_PROMPT}\n\n"
-		f"<user_question trustable=false>{question}\n</user_question>\n"
+		f"<user_question trustable=false>\n{question}\n</user_question>\n"
 		f"<available_card_data trustable=true>\n\n"
-		f"{''.join(card_sections)}\n</available_card_data>\n"
+		f"{''.join(card_sections)}</available_card_data>"
 	)
