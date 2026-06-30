@@ -2,11 +2,9 @@ import os
 import sqlite3
 import logging
 from pathlib import Path
-from dotenv import load_dotenv
+from config.settings import SQL_PATH
 
-load_dotenv()
-DEV = os.getenv("DEV") == "true"
-QUERY_DIR = Path("../../../sql") if DEV else Path("/app/sql")
+QUERY_DIR = Path(SQL_PATH)
 COUNT_TOTAL_CARDS = QUERY_DIR / "count_total_cards.sql"
 COUNT_CARDS = QUERY_DIR / "count_cards.sql"
 COUNT_CATEGORIES = QUERY_DIR / "count_categories.sql"
