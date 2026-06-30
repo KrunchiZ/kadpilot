@@ -6,9 +6,11 @@ import re
 import sqlite3
 import logging
 from pathlib import Path
-from typing import List, Dict
+from dotenv import load_dotenv
 from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
+
+load_dotenv()
 
 logging.basicConfig(
 	level=logging.INFO,
@@ -18,11 +20,11 @@ logging.basicConfig(
 
 # Global RAG state — populated by FastAPI lifespan at startup
 _embedder: SentenceTransformer | None = None
-_chunks: List[str] | None = None
+_chunks: list[str] | None = None
 _chunk_vectors = None
 
 
-def load_cards(db_path: Path) -> List[Dict]:
+def load_cards(db_path: Path) -> list[dict]:
 	"""Fetch all cards from SQLite."""
 	with sqlite3.connect(str(db_path)) as conn:
 		cursor = conn.cursor()
@@ -31,7 +33,7 @@ def load_cards(db_path: Path) -> List[Dict]:
 		return [dict(zip(columns, row)) for row in cursor.fetchall()]
 
 
-def initialize_rag_context(database_records: List[Dict],
+def initialize_rag_context(database_records: list[dict],
 						   embedder: SentenceTransformer):
 	"""Convert card records into searchable text chunks and pre-compute vectors.
 
@@ -61,7 +63,7 @@ def initialize_rag_context(database_records: List[Dict],
 				len(database_records))
 
 
-def retrieve_top_context(user_query: str, top_k: int) -> List[str]:
+def retrieve_top_context(user_query: str, top_k: int) -> list[str]:
 	"""Match the given query against pre-computed chunk vectors using cosine similarity.
 
 	Returns the top-K matching chunk strings.
@@ -76,7 +78,7 @@ def retrieve_top_context(user_query: str, top_k: int) -> List[str]:
 	return [_chunks[idx] for idx in top_indices]
 
 
-def extract_card_titles(matched_chunks: List[str]) -> List[str]:
+def extract_card_titles(matched_chunks: list[str]) -> list[str]:
 	"""Extract unique card titles from matched chunks, preserving order.
 
 	Chunks are formatted as: "Card: <title> (<bank>) | Category: ..."
