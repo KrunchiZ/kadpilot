@@ -54,6 +54,20 @@ Dashboard
         {% endfor %}
         </div>
 
+        {% if total > limit %}
+        <div class="pagination">
+            {% if prev_offset is not none %}
+            <a href="/dashboard?offset={{ prev_offset }}&limit={{ limit }}" class="page-btn">← Previous</a>
+            {% endif %}
+
+            <span>Showing {{ offset + 1 }}–{{ [offset + limit, total] | min }} of {{ total }}</span>
+
+            {% if next_offset is not none %}
+            <a href="/dashboard?offset={{ next_offset }}&limit={{ limit }}" class="page-btn">Next →</a>
+            {% endif %}
+        </div>
+        {% endif %}
+
     </div>
 
 </div>

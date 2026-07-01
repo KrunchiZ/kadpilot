@@ -7,14 +7,16 @@ router = APIRouter()
 
 
 @router.get("/dashboard")
-async def dashboard(request: Request):
+async def dashboard(request: Request, offset: int = 0, limit: int = 12):
     cards = []
     banks = []
     error = None
+    total = 0
 
     try:
-        data = await get_cards()
+        data = await get_cards(offset=offset, limit=limit, paginate=True)
         cards = data["cards"]
+        total = data["total"]
     except httpx.ConnectError:
         error = "Could not connect to the card service. Please try again later."
     except httpx.HTTPStatusError as e:
@@ -23,18 +25,30 @@ async def dashboard(request: Request):
         error = "The card service took too long to respond."
     except (KeyError, ValueError):
         error = "Received unexpected data from the card service."
+    except Exception as e:
+        # catches TypeError and anything else unexpected
+        error = f"An unexpected error occurred: {str(e)}"
 
     try:
         banks = await get_banks()
     except (httpx.HTTPError, KeyError, ValueError):
         banks = []
 
+    # calculate prev/next page offsets
+    prev_offset = max(offset - limit, 0) if offset > 0 else None
+    next_offset = offset + limit if (offset + limit) < total else None
+
     return request.app.state.templates.TemplateResponse(
         request, "dashboard.html",
         {
-            "cards": cards, 
-            "banks": banks, 
-            "error": error
+            "cards": cards,
+            "banks": banks,
+            "error": error,
+            "offset": offset,
+            "limit": limit,
+            "total": total,
+            "prev_offset": prev_offset,
+            "next_offset": next_offset,
         }
     )
 

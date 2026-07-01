@@ -32,7 +32,7 @@ async def get_health():
     return response.json()
 
 
-async def get_cards(offset: int = 0, limit: int = 17, paginate = True):
+async def get_cards(offset: int = 0, limit: int = 10, paginate: bool = False):
     """GET /api/v1/cards"""
 
     async with httpx.AsyncClient() as client:
