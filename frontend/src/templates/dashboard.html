@@ -5,47 +5,67 @@ Dashboard
 {% endblock %}
 
 {% block styles %}
-
 <link rel="stylesheet" href="/static/css/dashboard.css">
-
 {% endblock %}
 
 {% block content %}
 
 <h1>Available Credit Cards</h1>
 
-<input
-    id="search"
-    placeholder="Search card..."
->
-
-<div id="cardContainer">
-
-{% for card in cards %}
-
-<div class="card">
-
-    <h3>{{ card.card_title }}</h3>
-
-    <p>{{ card.bank }}</p>
-
-    <button
-        class="view-btn"
-        data-title="{{ card.card_title }}"
-    >
-        View Details
-    </button>
-
+{% if error %}
+<div class="error-banner">
+    ⚠️ {{ error }}
 </div>
+{% endif %}
 
-{% endfor %}
+<div class="dashboard-grid">
+
+    {% if not error %}
+    <div class="chart-panel">
+        <h3>Cards by Bank</h3>
+        <canvas id="bankChart"></canvas>
+    </div>
+    {% endif %}
+
+    <div class="cards-panel">
+
+        {% if banks %}
+        <select id="bankFilter">
+            <option value="">All Banks</option>
+            {% for bank in banks %}
+            <option value="{{ bank }}">{{ bank }}</option>
+            {% endfor %}
+        </select>
+        {% endif %}
+
+        <input id="search" placeholder="Search card...">
+
+        <div id="cardContainer">
+        {% for card in cards %}
+        <div class="card" data-bank="{{ card.bank }}">
+            <h3>{{ card.card_title }}</h3>
+            <p>{{ card.bank }}</p>
+            <button class="view-btn" data-title="{{ card.card_title }}">View Details</button>
+        </div>
+        {% else %}
+        {% if not error %}
+        <p class="empty-state">No cards available right now.</p>
+        {% endif %}
+        {% endfor %}
+        </div>
+
+    </div>
 
 </div>
 
 {% endblock %}
 
 {% block scripts %}
-
+{% if not error %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<script>
+    const cardsData = {{ cards | tojson }};
+</script>
+{% endif %}
 <script src="/static/js/dashboard.js"></script>
-
 {% endblock %}
