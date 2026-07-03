@@ -121,7 +121,7 @@ async def ask(request: Request, user_request: AskRequest):
 
 		# 5. Generate response
 		try:
-			answer = prompt_model(llm_model, full_prompt)
+			answer = prompt_model(llm_model, full_prompt, 0.2)
 		except Exception as e:
 			logging.error("LLM generation failed: %s", e)
 			raise HTTPException(status_code=503, detail=f"LLM service unavailable: {e}")
