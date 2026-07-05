@@ -9,3 +9,5 @@ build/
 .git/
 .pytest_cache/
 .ruff_cache/
+.claude/
+secrets/

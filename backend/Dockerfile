@@ -12,6 +12,8 @@ COPY pyproject.toml uv.lock ./
 RUN uv sync --frozen --no-install-project
 
 # Copy source code
+COPY data/ ./data/
+COPY sql/ ./sql/
 COPY src/ ./src/
 
 EXPOSE 8001

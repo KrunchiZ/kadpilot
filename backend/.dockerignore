@@ -9,4 +9,8 @@ build/
 .git/
 .pytest_cache/
 .ruff_cache/
-data/
+data/0_source/
+data/1_bronze/
+data/2_silver/
+.claude/
+secrets/
