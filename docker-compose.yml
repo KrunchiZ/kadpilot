@@ -5,30 +5,18 @@ services:
     image: backend:1.0
     container_name: kadpilot-backend
     env_file: .env
-    environment:
-      GEMINI_API_KEY: /run/secrets/gemini_api_key
-    secrets:
-      - gemini_api_key
     ports:
       - "8001:8001"
     networks:
       - app-net
-    volumes:
-      - ./backend/data/:/app/data:ro
-      - ./backend/sql:/app/sql:ro
     restart: unless-stopped
-    depends_on:
-      - ollama
 
   frontend:
     build:
       context: ./frontend
     image: frontend:1.0
     container_name: kadpilot-frontend
-    environment:
-      BACKEND_URL: /run/secrets/backend_url
-    secrets:
-      - backend_url
+    env_file: .env
     ports:
       - "8000:8000"
     depends_on:
@@ -37,25 +25,7 @@ services:
       - app-net
     restart: unless-stopped
 
-  ollama:
-    image: ollama/ollama:latest
-    container_name: kadpilot-ollama
-    ports:
-      - "11434:11434"
-    volumes:
-      - ${OLLAMA_MODEL_PATH:-/usr/share/ollama}/.ollama:/root/.ollama
-    networks:
-      - app-net
-    restart: unless-stopped
-
 
 networks:
   app-net:
     driver: bridge
-
-
-secrets:
-  gemini_api_key:
-    file: secrets/gemini_api_key.txt
-  backend_url:
-    file: secrets/backend_url.txt

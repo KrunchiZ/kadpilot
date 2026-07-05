@@ -1,5 +1,6 @@
-from pathlib import Path
+import os
 import httpx
+from pathlib import Path
 
 
 def get_secret(secret_name: str, default: str | None = None):
@@ -13,10 +14,7 @@ def get_secret(secret_name: str, default: str | None = None):
                 return default
             raise FileNotFoundError(f"Secret {secret_name} not found at {secret_path}")
 
-BACKEND_URL = get_secret(
-    "backend_url",
-    default="http://localhost:8001"
-)
+BACKEND_URL = get_secret("backend_url", default=os.getenv("BACKEND_URL", "http://localhost:8001"))
 
 
 async def get_health():

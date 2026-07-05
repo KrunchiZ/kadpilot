@@ -38,7 +38,7 @@ _ollama_client = None
 def _ensure_gemini_client():
 	global _gemini_client
 	if _gemini_client is None:
-		api_key = get_secret("gemini_api_key") or os.getenv("GEMINI_API_KEY")
+		api_key = get_secret("gemini_api_key", default=os.getenv("GEMINI_API_KEY", "invalid_api_key"))
 		if not api_key:
 			raise RuntimeError(
 				"GEMINI_API_KEY not found. "
@@ -53,7 +53,7 @@ def _ensure_ollama_client():
 	global _ollama_client
 	if _ollama_client is None:
 		_ollama_client = ollama.Client(
-			host=os.getenv("OLLAMA_HOST", "http://localhost:11434")
+			host=get_secret("ollama_host", default=os.getenv("OLLAMA_HOST", "http://localhost:11434"))
 		)
 	return _ollama_client
 
