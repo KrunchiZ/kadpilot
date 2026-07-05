@@ -12,8 +12,10 @@ COPY pyproject.toml uv.lock ./
 RUN uv sync --frozen --no-install-project
 
 # Download and cache all-MiniLM-L6-v2:
+ARG HF_TOKEN
+ARG SENTENCE_TRANSFORMER_HOME
 ENV HF_TOKEN=$HF_TOKEN
-ENV SENTENCE_TRANSFORMERS_HOME=/app/.cache/sentence_transformers
+ENV SENTENCE_TRANSFORMERS_HOME=$SENTENCE_TRANSFORMERS_HOME
 RUN uv run python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('all-MiniLM-L6-v2')"
 
 # Copy source code
