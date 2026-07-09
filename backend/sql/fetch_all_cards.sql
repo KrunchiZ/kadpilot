@@ -10,7 +10,6 @@ SELECT
     easy_payment_plan,
     fees,
     requirements,
-    features,
     min_annual_income
 FROM credit_cards
 LIMIT :limit

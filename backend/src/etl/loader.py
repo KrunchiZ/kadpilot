@@ -99,7 +99,6 @@ def init_entry(data):
 		"easy_payment_plan":	data["easy_payment_plan"],
 		"fees":					data["fees"],
 		"requirements":			data["requirements"],
-		"features":				data["features"],
 		"min_annual_income":	None,
 	}
 
@@ -117,7 +116,6 @@ def init_entry(data):
 		"easy_payment_plan":	data["easy_payment_plan"],
 		"fees":					data["fees"],
 		"requirements":			data["requirements"],
-		"features":				data["features"],
 		"min_annual_income":	None,
 		"content_hash":			sha256(hash_input.encode('utf-8')).hexdigest(),
 	}
@@ -137,7 +135,6 @@ def upsert_entry(conn, entry):
 					entry["easy_payment_plan"],
 					entry["fees"],
 					entry["requirements"],
-					entry["features"],
 					entry["min_annual_income"],
 					entry["content_hash"]
 	))

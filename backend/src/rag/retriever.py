@@ -54,7 +54,7 @@ def initialize_rag_context(database_records: list[dict],
 
 		for feature in ("cashback", "petrol", "rewards", "travel",
 						"premium_perks", "fees", "requirements",
-						"balance_transfer", "easy_payment_plan", "features"):
+						"balance_transfer", "easy_payment_plan"):
 			val = card.get(feature, "N/A")
 			if val and val != "N/A":
 				clean_val = re.sub(r"\s+", " ", val).strip()

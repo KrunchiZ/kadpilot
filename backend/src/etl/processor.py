@@ -21,7 +21,6 @@ class CreditCard(BaseModel):
 	easy_payment_plan	: str = Field(min_length=1)
 	fees				: str = Field(min_length=1)
 	requirements		: str = Field(min_length=1)
-	features			: str = Field(min_length=1)
 
 BANK_NAMES = [
 	"AEON",
@@ -65,7 +64,6 @@ def process_all_html(input_dir, output_dir):
 				easy_payment_plan = get_soup_text(soup, "easy-payment-plan")
 				fees = get_soup_text(soup, "fees")
 				requirements = get_soup_text(soup, "requirements")
-				features = get_soup_text(soup, "features")
 		except Exception as code:
 			logging.error(f"Error processing {html_file.name}: {code}")
 			continue
@@ -83,7 +81,6 @@ def process_all_html(input_dir, output_dir):
 				easy_payment_plan = easy_payment_plan,
 				fees = fees,
 				requirements = requirements,
-				features = features,
 			)
 			output_path = output_dir / (html_file.stem + ".json")
 			with open(output_path, "w", encoding="utf-8") as out_file:
