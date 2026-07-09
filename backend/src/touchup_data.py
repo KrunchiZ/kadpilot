@@ -28,7 +28,7 @@ logging.basicConfig(
 
 DEBUG = True
 LOCAL_MODEL = False
-_data_name = "requirements"  # field in card data to be tagged
+_data_name = "fees"  # field in card data to be tagged, f.e. "fees" or "requirements"
 
 # model passed to prompt_model()
 OLLAMA_MODELS = [
@@ -228,7 +228,7 @@ def _parse_response(raw: str, expected_ids: list[str]) -> dict[str, str]:
 		card_title, _, tags = line.partition(":")
 		card_title = card_title.strip().strip("\"\'[]").strip()
 		if card_title in expected_ids:
-			result[card_title] = tags.strip().strip("\"\',[]").strip()
+			result[card_title] = tags.strip().strip("\"\',[]").strip().replace("\\n", "\n")
 	return result
 
 
