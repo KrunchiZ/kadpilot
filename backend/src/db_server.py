@@ -129,5 +129,23 @@ def update_min_annual_income(card_title: str, min_annual_income: str) -> bool:
 		return False
 
 
+@mcp.tool()
+def update_card_detail(card_title: str, field: str, detail: str) -> bool:
+	# Write the extracted detail for a single card row.
+	sql = (
+		f"UPDATE credit_cards\n"
+		f"SET \"{field}\" = '{detail}'\n"
+		f"WHERE card_title = '{card_title}'"
+	)
+	try:
+		with _connect() as conn:
+			conn.execute(sql)
+			conn.commit()
+		return True
+	except Exception as exc:
+		print(f"[db_server] update_card_detail error for {card_title}: {exc}", file=sys.stderr)
+		return False
+
+
 if __name__ == "__main__":
 	mcp.run()
