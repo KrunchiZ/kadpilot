@@ -134,9 +134,17 @@ function applyFilters() {
     const search = filterSearch.value.toLowerCase().trim();
 
     filtered = allCards.filter(card => {
-        if (bank   && card.bank !== bank)                        return false;
-        if (income && card.min_annual_income !== income)         return false;
-        if (search && !card.card_title.toLowerCase().includes(search)) return false;
+        if (bank && card.bank !== bank)
+            return false;
+        if (income) {
+            if (/^\d+$/.test(income)/* && /^\d+$/.test(card.min_annual_income)*/) {
+                if (card.min_annual_income > Number(income)) return false;
+            }
+            else if (card.min_annual_income !== income)
+                return false;
+        }
+        if (search && !card.card_title.toLowerCase().includes(search))
+            return false;
         return true;
     });
 
