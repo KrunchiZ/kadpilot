@@ -79,7 +79,6 @@ Get a single card by title (URL-encoded).
   "easy_payment_plan": "Easy Payment Plans\nChoose from...",
   "fees": "Fees & Charges\nAnnual Fee RM0...",
   "requirements": "Requirements\nMinimum Annual Income RM24,000...",
-  "features": "Features\nEasy Payment Plan...",
   "min_annual_income": "24000"
 }
 ```

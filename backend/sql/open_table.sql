@@ -10,7 +10,6 @@ CREATE TABLE IF NOT EXISTS credit_cards (
 	easy_payment_plan	TEXT NOT NULL,
 	fees				TEXT NOT NULL,
 	requirements		TEXT NOT NULL,
-	features			TEXT NOT NULL,
 	min_annual_income	TEXT,
     content_hash		TEXT NOT NULL
 );

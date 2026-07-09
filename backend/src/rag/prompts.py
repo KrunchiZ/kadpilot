@@ -35,7 +35,7 @@ Response Example #2 (for invalid inquiries):
 FIELDS_TO_SHOW = [
 	"cashback", "petrol", "rewards", "travel",
 	"premium_perks", "balance_transfer", "easy_payment_plan",
-	"fees", "requirements", "features",
+	"fees", "requirements",
 ]
 
 

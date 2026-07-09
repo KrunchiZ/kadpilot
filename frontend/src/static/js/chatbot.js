@@ -78,7 +78,6 @@ function renderCardSpotlight(card, match_scores) {
 		["Easy Payment Plans",  card.easy_payment_plan],
 		["Fees & Charges",      card.fees],
 		["Requirements",        card.requirements],
-		["Features",            card.features],
 		["Min. Annual Income",  card.min_annual_income],
 	]
 	.filter(([_, v]) => v && v !== "N/A")
