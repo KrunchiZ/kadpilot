@@ -4,7 +4,7 @@ from pydantic import BaseModel, Field
 
 
 class AskRequest(BaseModel):
-	question: str = Field(..., min_length=1, max_length=500)
+	question: str = Field(..., min_length=1)
 	top_k: int = Field(default=10, ge=1, le=10)
 	llm_provider: Literal[
 		"gemini-3.1-flash-lite",
