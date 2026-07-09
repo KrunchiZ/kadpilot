@@ -25,7 +25,6 @@ services:
       - app-net
     restart: unless-stopped
 
-
 networks:
   app-net:
     driver: bridge
