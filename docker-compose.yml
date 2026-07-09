@@ -17,8 +17,8 @@ services:
       - ./backend/data/:/app/data:ro
       - ./backend/sql:/app/sql:ro
     restart: unless-stopped
-    depends_on:
-      - ollama
+    # depends_on:
+    #   - ollama
 
   frontend:
     build:
@@ -37,16 +37,16 @@ services:
       - app-net
     restart: unless-stopped
 
-  ollama:
-    image: ollama/ollama:latest
-    container_name: kadpilot-ollama
-    ports:
-      - "11434:11434"
-    volumes:
-      - ${OLLAMA_MODEL_PATH:-/usr/share/ollama}/.ollama:/root/.ollama
-    networks:
-      - app-net
-    restart: unless-stopped
+  # ollama:
+  #   image: ollama/ollama:latest
+  #   container_name: kadpilot-ollama
+  #   ports:
+  #     - "11434:11434"
+  #   volumes:
+  #     - ${OLLAMA_MODEL_PATH:-/usr/share/ollama}/.ollama:/root/.ollama
+  #   networks:
+  #     - app-net
+  #   restart: unless-stopped
 
 
 networks:
