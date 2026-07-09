@@ -28,6 +28,7 @@ logging.basicConfig(
 
 DEBUG = True
 LOCAL_MODEL = False
+_data_name = "requirements"  # field in card data to be tagged
 
 # model passed to prompt_model()
 OLLAMA_MODELS = [
@@ -44,7 +45,7 @@ GEMINI_MODELS = [
 MODEL = OLLAMA_MODELS[0] if LOCAL_MODEL else GEMINI_MODELS[0]
 
 TEMPERATURE = 0.0
-TOP_P = 0.95
+TOP_P = 0.1
 
 # Hypothetical local model rate limits (local models not in rate_limits.txt)
 # Formula: batch_size = floor(LOCAL_TPM / AVG_TOKENS_PER_JOB)
@@ -55,19 +56,17 @@ MAX_RETRIES				= 3
 BACKOFF_BASE_SECONDS	= 2.0        # seconds; doubles each retry
 
 PROMPT_LINES = [
-	"Extract the minimum annual income from the requirements of each credit card.",
+	"Add the missing punctuation and newline formatting to the following card data.",
 	"Reply ONLY in this JSON format, one line per card, no other explanation:",
-	"<card_title>: <min_annual_income>",
+	"<card_title>: <details>",
 	"",
 	"Rules:",
 	"- No other text or explanation; only the JSON lines.",
 	"- No markdown, no code blocks, no quotes, no extra characters.",
-	"- If the card has no minimum income requirement, look for the specific condition.",
 	"",
 	"Example:",
-	"AmBank Basic Credit Card: 'N/A'",
-	"AmBank Visa Credit Card: 48000",
-	"Alliance Bank Visa Infinite Business Credit Card: 'Invitation only'",
+	"AmBank Basic Credit Card: 'Fees & Charges\\nAnnual Fee= RM195 primary card. First year free. Waived when you swiped minimum 24 times on the subsequent years. RM0 supplementary card.\\nInterest Rate On Cash Withdrawals= 18%.'\\n",
+	"Alliance Bank Visa Infinite Business Credit Card: 'Fees & Charges\\nAnnual Fee= RM0 primary card. First year free. RM100 supplementary card.\\n",
 	"",
 	"--- DATA STARTS HERE ---",
 ]
@@ -103,7 +102,7 @@ async def _tag_data_async():
 		while True:
 			batch_size, retry_delay = await compute_batch_params(mcp)
 
-			untagged_result = await mcp.call_tool("fetch_untagged_cards", {"batch_size": batch_size})
+			untagged_result = await mcp.call_tool("fetch_all_cards", {"offset": b_idx * batch_size, "limit": batch_size})
 			batch: list[dict] = (
 				json.loads(untagged_result.content[0].text) if untagged_result.content else []
 			)
@@ -135,15 +134,15 @@ async def _tag_data_async():
 							"failed — skipping batch.")
 
 			for card in batch:
-				min_annual_income = parsed.get(card["card_title"], "")
-				if not min_annual_income:
+				detail = parsed.get(card["card_title"], "")
+				if not detail:
 					continue
 				ok = await mcp.call_tool(
-					"update_min_annual_income",
-					{"card_title": card["card_title"], "min_annual_income": min_annual_income}
+					"update_card_detail",
+					{"card_title": card["card_title"], "field": _data_name, "detail": detail}
 				)
 				if ok:
-					logging.info(f"Analyzed {card['card_title']}: {min_annual_income}")
+					logging.info(f"Processed {card['card_title']}: {detail}")
 			b_idx += 1
 
 		if b_idx == 0:
@@ -210,9 +209,9 @@ def _parse_num(s: str) -> int:
 def _build_prompt(cards: list[dict], prompt_lines: list[str]) -> str:
 	# Compact prompt — one line per card, no markdown or chain-of-thought.
 	for card in cards:
-		requirement = (card.get("requirements").replace("\n", " ") or "").strip()
+		detail = (card.get(_data_name).replace("\n", " ") or "").strip()
 		prompt_lines.append(f'{card["card_title"]}\n{card["bank"]}\n'
-					 f'\n{requirement}\n---')
+					 f'\n{detail}\n---')
 	return "\n".join(prompt_lines)
 
 
