@@ -101,7 +101,7 @@ function formatIncome(val) {
 
 function renderCard(card) {
     const col = document.createElement("div");
-    col.className = "col-12 col-sm-6 col-lg-4";
+    col.className = "col-12 col-sm-6 col-lg-4 d-flex";
     col.innerHTML = `
         <div class="card-tile">
             <span class="card-tile-bank">${escHtml(card.bank)}</span>
